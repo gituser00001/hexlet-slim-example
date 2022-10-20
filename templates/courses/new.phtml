@@ -1,0 +1,21 @@
+<!-- BEGIN (write your solution here) -->
+<form action="/courses" method="post">
+  <div>
+    <label>
+        Имя
+    <input type="text" name="course[title]" value="<?= htmlspecialchars($course['title']) ?>">
+    </label>
+    <?php if (isset($errors['title'])) : ?>
+      <div><?= $errors['title'] ?></div>
+    <?php endif ?>
+    <select name="course[paid]">
+        <option  value="">Стоимость</option>
+        <option <?= $course['paid'] === '1' ? 'selected' : '' ?> value="1">Платный</option>
+        <option <?= $course['paid'] === '2' ? 'selected' : '' ?>  value="2">Бесплатный</option>
+      </select>
+      <?php if (isset($errors['paid'])) : ?>
+      <div><?= $errors['paid'] ?></div>
+      <?php endif ?>
+  </div>
+  <input type="submit" value="Sign Up">
+<!-- END -->
