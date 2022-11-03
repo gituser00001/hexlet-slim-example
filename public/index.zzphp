@@ -1,0 +1,76 @@
+<?php
+
+// Подключение автозагрузки через composer
+require __DIR__ . '/../vendor/autoload.php';
+
+use Slim\Factory\AppFactory;
+use DI\Container;
+use App\Validator;
+
+use function Symfony\Component\String\s;
+
+// Старт PHP сессии
+session_start();
+
+$repo = new App\CourseRepository();
+$companies = App\Generator::generate(100);
+$users = App\Generator::generate(100);
+
+$container = new Container();
+$container->set('renderer', function () {
+    // Параметром передается базовая директория, в которой будут храниться шаблоны
+    return new \Slim\Views\PhpRenderer(__DIR__ . '/../templates');
+});
+$container->set('flash', function () {
+    return new \Slim\Flash\Messages();
+});
+$app = AppFactory::createFromContainer($container);
+$app->addErrorMiddleware(true, true, true);
+
+$app->get('/', function ($request, $response) {
+    return $this->get('renderer')->render($response, 'index.phtml');
+});
+
+
+$app->get('/courses', function ($request, $response) use ($repo) {
+    $messages = $this->get('flash')->getMessages();
+    print_r($messages['success'][0]); // => ['success' => ['This is a message']]
+    $params = [
+        'courses' => $repo->all(),
+        'flash' => $messages
+    ];
+    return $this->get('renderer')->render($response, 'courses/index.phtml', $params);
+})->setName('courses');
+
+$router = $app->getRouteCollector()->getRouteParser();
+
+// BEGIN (write your solution here)
+$app->post('/courses', function ($request, $response) use ($repo, $router) {
+    $validator = new Validator();
+    $course = $request->getParsedBodyParam('course');
+    $errors = $validator->validate($course);
+    if (count($errors) === 0) {
+        $repo->save($course);
+        return $response->withRedirect($router->urlFor('courses'), 302);
+    }
+    $params = [
+        'course' => $course,
+        'errors' => $errors
+    ];
+    $newResponse = $response->withStatus(422);
+
+
+    return $this->get('renderer')->render($newResponse, 'courses/new.phtml', $params);
+});
+
+$app->get('/courses/new', function ($request, $response) use ($repo) {
+    $params = [
+        'course' => ['title' => '', 'paid' => ''],
+        'errors' => []
+    ];
+    $this->get('flash')->addMessage('success', 'Атлична!!!!');
+    return $this->get('renderer')->render($response, 'courses/new.phtml', $params);
+});
+// END
+
+$app->run();

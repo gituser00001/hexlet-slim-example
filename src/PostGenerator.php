@@ -2,7 +2,7 @@
 
 namespace App;
 
-class Generator
+class PostGenerator
 {
     public static function generate($count)
     {
@@ -11,16 +11,16 @@ class Generator
 
         $faker = \Faker\Factory::create();
         $faker->seed(1);
-        $users = [];
+        $posts = [];
         for ($i = 0; $i < $count; $i++) {
-            $users[] = [
-                'id' => $numbers[$i],
-                'firstName' => $faker->firstName,
-                'lastName' => $faker->lastName,
-                'email' => $faker->email
+            $posts[] = [
+                'id' => $faker->uuid,
+                'name' => $faker->text(70),
+                'body' => $faker->sentence,
+                'slug' => $faker->slug
             ];
         }
 
-        return $users;
+        return $posts;
     }
 }

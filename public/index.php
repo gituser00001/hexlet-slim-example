@@ -1,59 +1,65 @@
 <?php
 
-// Подключение автозагрузки через composer
-require __DIR__ . '/../vendor/autoload.php';
+error_reporting(E_ALL);
+ini_set('display_errors', 'On');
 
 use Slim\Factory\AppFactory;
 use DI\Container;
-use App\Validator;
+use Slim\Middleware\MethodOverrideMiddleware;
 
-use function Symfony\Component\String\s;
+require __DIR__ . '/../vendor/autoload.php';
 
-$repo = new App\CourseRepository();
-
+session_save_path(__DIR__ . '/../src/session');
+session_start()
 $container = new Container();
 $container->set('renderer', function () {
-    // Параметром передается базовая директория, в которой будут храниться шаблоны
     return new \Slim\Views\PhpRenderer(__DIR__ . '/../templates');
 });
-$app = AppFactory::createFromContainer($container);
+$container->set('flash', function () {
+    return new \Slim\Flash\Messages();
+});
+
+AppFactory::setContainer($container);
+$app = AppFactory::create();
 $app->addErrorMiddleware(true, true, true);
+$app->add(MethodOverrideMiddleware::class);
 
-$app->get('/', function ($request, $response) {
-    return $this->get('renderer')->render($response, 'index.phtml');
-});
-
-$app->get('/courses', function ($request, $response) use ($repo) {
-    $params = [
-        'courses' => $repo->all()
-    ];
-    return $this->get('renderer')->render($response, 'courses/index.phtml', $params);
-});
+$users = [
+    ['name' => 'admin', 'passwordDigest' => hash('sha256', 'secret')],
+    ['name' => 'mike', 'passwordDigest' => hash('sha256', 'superpass')],
+    ['name' => 'kate', 'passwordDigest' => hash('sha256', 'strongpass')]
+];
 
 // BEGIN (write your solution here)
-$app->post('/courses', function ($request, $response) use ($repo) {
-    $validator = new Validator();
-    $course = $request->getParsedBodyParam('course');
-    $errors = $validator->validate($course);
-    if (count($errors) === 0) {
-        $repo->save($course);
-        return $response->withRedirect('/courses', 302);
-    }
-    $params = [
-        'course' => $course,
-        'errors' => $errors
-    ];
-
-
-    return $this->get('renderer')->render($response, 'courses/new.phtml', $params);
+$app->get('/', function ($request, $response) {
+    $flash = $this->get('flash')->getMessages();
+        $params = [
+        'flash' => $flash,
+        'currentUser' => $_SESSION['user'] ?? null
+        ];
+        return $this->get('renderer')->render($response, 'index.phtml', $params);
 });
 
-$app->get('/courses/new', function ($request, $response) use ($repo) {
-    $params = [
-        'course' => ['title' => '', 'paid' => ''],
-        'errors' => []
-    ];
-    return $this->get('renderer')->render($response, 'courses/new.phtml', $params);
+$app->post('/session', function ($request, $response) use ($users) {
+    $user = $request->getParsedBodyParam('user');
+    $pwd = hash('sha256', $user['password']);
+
+    $goodUser = collect($users)->firstWhere('name', $user['name']);
+    if (is_null($goodUser)) {
+        $this->get('flash')->addMessage('success', 'Wrong password or name');
+        return $response->withRedirect('/');
+    } elseif ($pwd !== $goodUser['passwordDigest']) {
+        $this->get('flash')->addMessage('success', 'Wrong password or name');
+        return $response->withRedirect('/');
+    }
+    $_SESSION['user'] = $user['name'];
+    return $response->withRedirect('/');
+});
+$app->delete('/session', function ($request, $response) {
+    $_SESSION = [];
+    session_destroy();
+
+    return $response->withRedirect('/');
 });
 // END
 

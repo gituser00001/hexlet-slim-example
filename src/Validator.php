@@ -4,14 +4,14 @@ namespace App;
 
 class Validator implements ValidatorInterface
 {
-    public function validate(array $course): array
+    public function validate(array $user): array
     {
         // BEGIN (write your solution here)
         $errors = [];
-        if (empty($course['title'])) {
-            $errors['title'] = "Can't be blank";
-        } elseif (empty($course['paid'])) {
-            $errors['paid'] = "Can't be blank";
+        if (empty($user['name'])) {
+            $errors['name'] = "Can't be blank";
+        } elseif (strlen($user['name']) < 4) {
+            $errors['name'] = "Nickname must be grater than 4 characters";
         }
 
         return $errors;

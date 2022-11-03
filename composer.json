@@ -10,6 +10,7 @@
         "php-di/php-di": "^6.4",
         "fakerphp/faker": "^1.20",
         "tightenco/collect": "^9.33",
-        "symfony/string": "^6.1"
+        "symfony/string": "^6.1",
+        "slim/flash": "^0.4.0"
     }
 }

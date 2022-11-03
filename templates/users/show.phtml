@@ -1,19 +1,33 @@
-<table>
+<table border="1">
     <tr>
-    <td>
-        Page Id: <?php htmlspecialchars($id) ?>
+      <td>
+        ID: 
       </td>
+      <td>
+        Name: 
+      </td>
+      <td>
+        Email:
+      </td>
+      <td>Edit?</td>
+      <td>Delete?</td>
+    </tr>
+    <tr>
       <td>
         <?= $username['id'] ?>
       </td>
       <td>
-        <?= $username['firstName'] ?>
-      </td>
-      <td>
-        <?= $username['lastName'] ?>
+        <?= $username['name'] ?>
       </td>
       <td>
         <?= $username['email'] ?>
+      </td>
+      <td><a href="/users/<?= $username['id'] ?>/edit">Edit</a></td>
+      <td>
+      <form action="/users/<?= $username['id'] ?>" method="post">
+  <input type="hidden" name="_METHOD" value="DELETE">
+  <input type="submit" value="Remove">
+</form>
       </td>
     </tr>
 </table>
