@@ -17,21 +17,17 @@ ini_set('display_errors', 'On');
   <div>
     <label>
         Имя
-    <input type="text" required name="user[name]" value="">
+    <input type="email" required name="user[email]" value="">
     </label>
   </div>
-  <div>
-    <label>
-      Пароль
-      <input type="password" required name="user[password]" value="">
-    </label>
-    </div>
     <input type="submit" value="Sign In">
 </form>
 
 <?php else : ?>
   <ul>
     <li><?= htmlspecialchars($currentUser)?></li>
+    <li><a href="/users">Список пользователей</a></li>
+    <li><a href="/users/new">Создать нового пользователя</a></li>
   </ul>
   <form action="/session" method="post">
   <input type="hidden" name="_METHOD" value="DELETE">
