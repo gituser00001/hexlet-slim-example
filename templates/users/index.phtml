@@ -1,0 +1,15 @@
+<form action="/users" method="get">
+  <input type="search" name="term" />
+  <input type="submit" value="Search" />
+</form>
+<br>
+<?php foreach ($messages['success'] as $message) : ?>
+    <p style="color: green"><?= htmlspecialchars($message) ?></p>
+<?php endforeach ?>
+<br>
+<ul>
+    <?php foreach ($users as $user) : ?>
+        <li>Name: <?= htmlspecialchars($user['name']) ?> || Email: <?= $user['email'] ?> || <a href="/user/<?= $user['id']?>"><?= $user['id']?></a>
+      </li>
+    <?php endforeach ?>
+</ul>
